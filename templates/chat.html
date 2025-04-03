@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat With Data</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Google Sans', sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 60px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 8px 24px;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: #ffffff;
+        }
+
+        .header-logo {
+            height: 65px;
+            margin-right: 12px;
+            margin-top: -10px;
+            margin-bottom: -10px;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: #202124;
+            margin-right: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-title span {
+            color: #5f6368;
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background-color: #1a73e8;
+            color: white;
+            flex-direction: row-reverse;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+        }
+
+        .message-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-content p {
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .visualization {
+            width: 100%;
+            margin-top: 16px;
+            padding: 16px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .visualization-reason {
+            color: #5f6368;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .plot-container {
+            width: 100%;
+            height: 400px;
+        }
+
+        .plot-container .text {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 12px;
+        }
+
+        .input-area {
+            padding: 24px;
+            background-color: #ffffff;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 768px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 24px;
+            padding: 12px 24px;
+        }
+
+        .input-field {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: #202124;
+            background: transparent;
+        }
+
+        .send-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #1a73e8;
+            font-size: 20px;
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: #202124;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .welcome-message h1 {
+            font-size: 32px;
+            margin-bottom: 16px;
+            color: #666;
+        }
+
+        .welcome-message p {
+            font-size: 16px;
+            color: #5f6368;
+            margin-bottom: 24px;
+        }
+
+        .example-queries {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .query-card {
+            background-color: #ffffff;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .query-card:hover {
+            background-color: #f8f9fa;
+            border-color: #1a73e8;
+        }
+
+        .loading-indicator {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1a73e8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-indicator p {
+            margin: 0;
+            color: #5f6368;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        </aside>
+        <main class="main-content">
+            <header class="header">
+                <img src="/static/bullla.png" alt="Bullla Logo" class="header-logo">
+                <div class="header-title">
+                    Chat With Data
+                    <span>Versão Experimental</span>
+                </div>
+                <div class="header-actions">
+                    <span class="user-icon">👤</span>
+                    <span>⋮</span>
+                </div>
+            </header>
+            <div class="chat-area">
+                <div class="welcome-message">
+                    <h1>Chat With Data para Bullla Instituição de Pagamento S.A.</h1>
+                    <p>Faça perguntas sobre seus dados e obtenha insights valiosos instantaneamente</p>
+                    <div class="example-queries">
+                        <div class="query-card">
+                            Qual o valor de OPFIN do último mês?
+                        </div>
+                        <div class="query-card">
+                            Qual é a média de cartões emitidos por mês?
+                        </div>
+                        <div class="query-card">
+                            "Mostre a distribuição de status dos cartões"
+                        </div>
+                        <div class="query-card">
+                            "Qual o total de cartões emitidos nos últimos 6 meses?"
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="input-area">
+                <div class="input-container">
+                    <input type="text" class="input-field" placeholder="Insira um comando para o Chat With Data">
+                    <button class="send-button">➤</button>
+                </div>
+            </div>
+            <div class="loading-indicator" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Processando sua pergunta...</p>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.plot.ly/plotly-2.29.1.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputField = document.querySelector('.input-field');
+            const sendButton = document.querySelector('.send-button');
+            const chatArea = document.querySelector('.chat-area');
+            const welcomeMessage = document.querySelector('.welcome-message');
+            const queryCards = document.querySelectorAll('.query-card');
+
+            // Função para criar uma mensagem de chat
+            function createMessage(text, isUser = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+                messageDiv.innerHTML = `
+                    <div class="message-icon">${isUser ? '👤' : '🤖'}</div>
+                    <div class="message-content">
+                        <p>${text}</p>
+                    </div>
+                `;
+                return messageDiv;
+            }
+
+            // Função para criar uma visualização
+            function createVisualization(data, type, reason) {
+                const visualizationDiv = document.createElement('div');
+                visualizationDiv.className = 'visualization';
+                visualizationDiv.innerHTML = `
+                    <p class="visualization-reason">${reason}</p>
+                    <div class="plot-container"></div>
+                `;
+
+                const plotContainer = visualizationDiv.querySelector('.plot-container');
+                
+                let layout = {
+                    title: data.title || 'Visualização dos Dados',
+                    margin: { t: 40, b: 40, l: 40, r: 40 },
+                    height: 400,
+                    font: {
+                        family: 'Google Sans, sans-serif'
+                    }
+                };
+
+                let trace;
+                switch (type) {
+                    case 'bar':
+                        trace = {
+                            x: data.x,
+                            y: data.y,
+                            type: 'bar',
+                            text: data.y.map(y => y.toLocaleString('pt-BR')),
+                            textposition: 'auto',
+                            hoverinfo: 'x+y',
+                            textfont: {
+                                family: 'Google Sans, sans-serif',
+                                size: 12
+                            }
+                        };
+                        break;
+                    case 'horizontal_bar':
+                        trace = {
+                            x: data.x,
+                            y: data.y,
+                            type: 'bar',
+                            orientation: 'h',
+                            text: data.x.map(x => x.toLocaleString('pt-BR')),
+                            textposition: 'auto',
+                            hoverinfo: 'x+y',
+                            textfont: {
+                                family: 'Google Sans, sans-serif',
+                                size: 12
+                            }
+                        };
+                        break;
+                    case 'line':
+                        trace = {
+                            x: data.x,
+                            y: data.y,
+                            type: 'scatter',
+                            mode: 'lines+markers+text',
+                            text: data.y.map(y => y.toLocaleString('pt-BR')),
+                            textposition: 'top center',
+                            hoverinfo: 'x+y',
+                            textfont: {
+                                family: 'Google Sans, sans-serif',
+                                size: 12
+                            }
+                        };
+                        break;
+                    case 'pie':
+                        trace = {
+                            labels: data.labels,
+                            values: data.values,
+                            type: 'pie',
+                            textinfo: 'label+percent+value',
+                            textposition: 'outside',
+                            hoverinfo: 'label+percent+value',
+                            textfont: {
+                                family: 'Google Sans, sans-serif',
+                                size: 12
+                            }
+                        };
+                        break;
+                    case 'scatter':
+                        trace = {
+                            x: data.x,
+                            y: data.y,
+                            type: 'scatter',
+                            mode: 'markers+text',
+                            text: data.y.map(y => y.toLocaleString('pt-BR')),
+                            textposition: 'top center',
+                            hoverinfo: 'x+y',
+                            textfont: {
+                                family: 'Google Sans, sans-serif',
+                                size: 12
+                            }
+                        };
+                        break;
+                }
+
+                if (trace) {
+                    Plotly.newPlot(plotContainer, [trace], layout);
+                }
+
+                return visualizationDiv;
+            }
+
+            // Função para mostrar o indicador de carregamento
+            function showLoading() {
+                const loadingIndicator = document.querySelector('.loading-indicator');
+                loadingIndicator.style.display = 'flex';
+            }
+
+            // Função para esconder o indicador de carregamento
+            function hideLoading() {
+                const loadingIndicator = document.querySelector('.loading-indicator');
+                loadingIndicator.style.display = 'none';
+            }
+
+            // Função para processar a pergunta
+            async function processQuestion(question) {
+                try {
+                    showLoading();
+                    const response = await fetch('/query', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ question }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    // Adiciona a resposta do assistente
+                    const assistantMessage = createMessage(data.answer);
+                    chatArea.appendChild(assistantMessage);
+
+                    // Adiciona a visualização se houver
+                    if (data.visualization !== 'none' && data.formatted_data_for_visualization) {
+                        const visualization = createVisualization(
+                            data.formatted_data_for_visualization,
+                            data.visualization,
+                            data.visualization_reason
+                        );
+                        chatArea.appendChild(visualization);
+                    }
+
+                    // Rola para a última mensagem
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                } catch (error) {
+                    console.error('Erro:', error);
+                    const errorMessage = createMessage('Ocorreu um erro ao processar sua pergunta. Por favor, tente novamente.');
+                    chatArea.appendChild(errorMessage);
+                } finally {
+                    hideLoading();
+                }
+            }
+
+            // Evento de clique no botão de enviar
+            sendButton.addEventListener('click', async function() {
+                const question = inputField.value.trim();
+                if (question) {
+                    // Esconde a mensagem de boas-vindas
+                    welcomeMessage.style.display = 'none';
+
+                    // Adiciona a pergunta do usuário
+                    const userMessage = createMessage(question, true);
+                    chatArea.appendChild(userMessage);
+
+                    // Limpa o campo de entrada
+                    inputField.value = '';
+
+                    // Processa a pergunta
+                    await processQuestion(question);
+                }
+            });
+
+            // Evento de pressionar Enter no campo de entrada
+            inputField.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendButton.click();
+                }
+            });
+
+            // Eventos para os cards de exemplo
+            queryCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    inputField.value = this.textContent.trim();
+                    sendButton.click();
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
