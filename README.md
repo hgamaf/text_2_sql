@@ -1,4 +1,4 @@
-# Chat With Data - Bullla IP S.A.
+# Text to SQL
 
 > ⚠️ **EM DESENVOLVIMENTO** - Este projeto está em fase de desenvolvimento ativo. Novas funcionalidades e melhorias estão sendo implementadas regularmente.
 
@@ -195,7 +195,3 @@ O sistema suporta vários tipos de visualização:
 4. **Gráficos de Dispersão**:
    - Correlações
    - Relacionamentos entre variáveis
-
-## Licença
-
-Este projeto é proprietário da Bullla Instituição de Pagamento S.A. Todos os direitos reservados. 
