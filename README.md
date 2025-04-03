@@ -91,9 +91,9 @@ O projeto utiliza as seguintes bibliotecas principais:
 
 2. **Configurações do Projeto**:
    ```python
-   PROJECT_ID = "gc-pr-dl-001"
-   DATASET_ID = "dtl_bl_rag"
-   GEMINI_MODEL = "gemini-1.5-pro"
+   PROJECT_ID = "nome-do-projeto"
+   DATASET_ID = "esquema-de-dados"
+   GEMINI_MODEL = "modelo-generativo-utilizado"
    GEMINI_TEMPERATURE = 0
    ```
 
